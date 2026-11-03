@@ -15,12 +15,17 @@ Cámara estéreo **Stereolabs ZED 2i** para el Caddy AI2, siguiendo la estructur
 | Dockerfile / contenedor para el Jetson Orin NX | ⏳ pendiente |
 | Malla oficial de la cámara | ⏳ pendiente (caja provisional) |
 
+> Para continuar el trabajo en otra sesión: [`docs/HANDOFF.md`](docs/HANDOFF.md). Instalación: `scripts/setup_workspace.sh`.
+
 ## Contenido
 
 ```
 description/sensor.urdf.j2          # link + joint + frame óptico + sensor rgbd_camera (Jinja2)
 bringup/config/sensor_params.yaml   # parámetros operativos (hardware real) y de simulación
 bringup/launch/zed_2i.launch.py     # hardware real: zed_wrapper con camera_name y serial_number
+tools/check_render.py               # comprobación sin ROS ni Gazebo de plantillas y bridge
+scripts/setup_workspace.sh          # monta el workspace (sim) o solo este paquete (jetson)
+docs/HANDOFF.md                     # estado, decisiones y pendientes
 ```
 
 ## Topics
