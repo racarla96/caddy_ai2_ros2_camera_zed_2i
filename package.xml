@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>caddy_ai2_ros2_camera_zed_2i</name>
+  <version>0.1.0</version>
+  <description>Stereolabs ZED 2i camera for the Caddy AI2 — URDF fragment with Gazebo Harmonic rgbd_camera for simulation, and a launch wrapper around zed-ros2-wrapper for the real hardware.</description>
+  <maintainer email="racarla96@gmail.com">racarla96</maintainer>
+  <license>CC-BY-4.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

@@ -1,0 +1,24 @@
+# Runtime parameters for the Stereolabs ZED 2i camera.
+# Physical constants (mass, inertia, dimensions) are hardcoded in sensor.urdf.j2.
+# One package, several instances: the pose and name of each camera live in
+# caddy_ai2_ros2_description/bringup/config/robot_params.yaml (sensors section).
+
+hardware:
+  camera_model: zed2i
+  lens: 2.1mm              # 2.1 mm lens: 110 x 70 deg. The 4 mm lens is 72 x 44 deg.
+  baseline: 0.12           # m between the two lenses
+
+operation:
+  # Used by the real driver (zed-ros2-wrapper), see bringup/launch/zed_2i.launch.py.
+  grab_resolution: HD720
+  grab_frame_rate: 15      # Hz
+
+simulation:
+  # The ZED SDK does not run in Gazebo. A Gazebo rgbd_camera stands in for the left
+  # lens: RGB + registered depth + point cloud, published with ZED-like topic names.
+  horizontal_fov: 110.0    # deg. Set 72.0 to simulate the 4 mm lens.
+  image_width: 1280
+  image_height: 628        # 1280/628 gives a 70 deg vertical FOV with a 110 deg horizontal FOV
+  range_min: 0.3           # m
+  range_max: 20.0          # m
+  update_rate: 15.0        # Hz. Lower it if several cameras slow the simulation down.

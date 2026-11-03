@@ -1,0 +1,90 @@
+{#-
+  URDF fragment: link + visual + joint for a Stereolabs ZED 2i, plus its ROS optical frame.
+  When gazebo=true, also injects a Gazebo rgbd_camera sensor (RGB + depth + point cloud).
+  The same template is instantiated once per camera (see robot_params.yaml).
+
+  Variables always required:
+    prefix, sensor_name, frame_id,
+    x, y, z, roll, pitch, yaw  (pose relative to base_link),
+    sensor_share               (absolute path to this package's share dir)
+
+  Additional variables required only when gazebo=true:
+    namespace, horizontal_fov (deg), image_width, image_height,
+    range_min, range_max, update_rate
+
+  Frames:
+    <frame_id>          body frame, x forward / y left / z up (what Gazebo renders along +x)
+    <frame_id>_optical  ROS optical frame, z forward / x right / y down (used as image frame_id)
+#}
+
+  <link name="{{ prefix }}{{ frame_id }}">
+    <inertial>
+      <!-- box ~30 x 175 x 43 mm, ~166 g; frame at the midpoint between the two lenses -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.166"/>
+      <inertia ixx="0.0004508" ixy="0" ixz="0"
+               iyy="0.0000384" iyz="0"
+               izz="0.0004378"/>
+    </inertial>
+    <visual>
+      <!-- Placeholder: no official mesh in the repo yet, so a plain box is used. -->
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.0303 0.1753 0.0431"/>
+      </geometry>
+      <material name="{{ prefix }}{{ sensor_name }}_material">
+        <color rgba="0.05 0.05 0.05 1.0"/>
+      </material>
+    </visual>
+  </link>
+
+  <joint name="{{ prefix }}{{ sensor_name }}_joint" type="fixed">
+    <parent link="{{ prefix }}base_link"/>
+    <child link="{{ prefix }}{{ frame_id }}"/>
+    <origin xyz="{{ x }} {{ y }} {{ z }}" rpy="{{ roll }} {{ pitch }} {{ yaw }}"/>
+  </joint>
+
+  <gazebo reference="{{ prefix }}{{ sensor_name }}_joint">
+    <preserveFixedJoint>true</preserveFixedJoint>
+  </gazebo>
+
+  <link name="{{ prefix }}{{ frame_id }}_optical"/>
+
+  <joint name="{{ prefix }}{{ sensor_name }}_optical_joint" type="fixed">
+    <parent link="{{ prefix }}{{ frame_id }}"/>
+    <child link="{{ prefix }}{{ frame_id }}_optical"/>
+    <origin xyz="0 0 0" rpy="-1.5707963267948966 0 -1.5707963267948966"/>
+  </joint>
+
+{%- if gazebo | default(false) %}
+{%- set PI = 3.14159265358979 %}
+{%- set hfov_rad = horizontal_fov * PI / 180.0 %}
+
+  <gazebo reference="{{ prefix }}{{ frame_id }}">
+    <sensor name="{{ prefix }}{{ sensor_name }}" type="rgbd_camera">
+      <!-- rgbd_camera publishes <topic>/image, <topic>/depth_image, <topic>/points and <topic>/camera_info -->
+      <topic>{{ ('/' + namespace + '/') if namespace else '/' }}{{ sensor_name }}/rgbd</topic>
+      <update_rate>{{ update_rate }}</update_rate>
+      <always_on>true</always_on>
+      <visualize>false</visualize>
+      <camera>
+        <horizontal_fov>{{ hfov_rad }}</horizontal_fov>
+        <image>
+          <width>{{ image_width }}</width>
+          <height>{{ image_height }}</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>{{ range_min }}</near>
+          <far>{{ range_max }}</far>
+        </clip>
+        <depth_camera>
+          <clip>
+            <near>{{ range_min }}</near>
+            <far>{{ range_max }}</far>
+          </clip>
+        </depth_camera>
+      </camera>
+    </sensor>
+  </gazebo>
+{%- endif %}
