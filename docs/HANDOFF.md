@@ -56,10 +56,11 @@ Gazebo publica `/<ns>/<cam>/rgbd/{image,depth_image,points,camera_info}` y el br
 
 Verificado (sin ROS ni Gazebo, con `python3 -I tools/check_render.py [WS/src]`): las plantillas se renderizan para A y B, el URDF es XML válido con todos los joints enlazados, hay un sensor Gazebo por cámara activa, el bridge genera 4 entradas por cámara con nombres únicos y con prefijo/namespace, y la geometría (solape y cobertura) sale como se esperaba.
 
+Verificado además contra el código vendorizado (`third_party/zed-ros2-wrapper`, v5.5.0-22): `zed_camera.launch.py` declara `camera_name`, `camera_model`, `serial_number`, `publish_urdf`, `publish_tf` y `publish_map_tf`. Ojo: `operation.grab_*` de `sensor_params.yaml` no se pasa al wrapper (su `zed2i.yaml` usa 60 fps).
+
 **No verificado:**
 - Que Gazebo arranque con los sensores y que el bridge `ros_gz_bridge` los acepte (en particular `gz.msgs.CameraInfo` y `PointCloudPacked` desde `rgbd_camera`).
 - Que los nombres de topics del bridge coincidan con los `gz_topic_name` reales que publica `rgbd_camera` (se asumió `<topic>/image`, `/depth_image`, `/points`, `/camera_info`).
-- Que `zed_2i.launch.py` use los argumentos correctos de la versión instalada de `zed_wrapper` (`camera_name`, `camera_model`, `serial_number`, `publish_urdf`, `publish_tf`, `publish_map_tf`).
 - Nada del hardware real.
 
 ## Riesgo conocido: frames reales frente a simulados
@@ -78,6 +79,10 @@ la nube de puntos real no se podrá transformar a `base_link`. Hay que reconcili
 5. Con dos cámaras reales hace falta `serial_number` distinto en cada lanzamiento.
 6. Malla visual de la ZED 2i (ahora es una caja) e IMU de la cámara en simulación (no está).
 7. Abrir PRs de las ramas `feat/zed-2i-cameras` y, al fusionarlas, actualizar los punteros del repo `sim`.
+
+## Driver vendorizado
+
+`third_party/zed-ros2-wrapper` es submódulo del fork `racarla96/zed-ros2-wrapper` (rama `master`, remoto `upstream` = stereolabs). Colcon no lo ve (el paquete padre bloquea el descenso) y el sim no lo compila: necesita ZED SDK. Actualizar: `gh repo sync racarla96/zed-ros2-wrapper -b master`, `git -C third_party/zed-ros2-wrapper pull`, commit del puntero.
 
 ## Trampas del workspace
 
