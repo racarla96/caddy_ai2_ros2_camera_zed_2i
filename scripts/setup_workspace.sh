@@ -29,7 +29,16 @@ fi
 
 case "$PROFILE" in
   sim)
-    git clone --recurse-submodules -b "$SIM_BRANCH" "$OWNER_URL/caddy_ai2_ros2_sim.git" "$TARGET"
+    git clone -b "$SIM_BRANCH" "$OWNER_URL/caddy_ai2_ros2_sim.git" "$TARGET"
+    # One by one: a submodule whose pinned commit is missing on GitHub must not stop the rest.
+    FAILED=()
+    for sub in $(git -C "$TARGET" config -f .gitmodules --get-regexp '^submodule\..*\.path$' | awk '{print $2}'); do
+      git -C "$TARGET" submodule update --init --recursive -- "$sub" || FAILED+=("$sub")
+    done
+    if (( ${#FAILED[@]} )); then
+      echo "[setup] WARNING: these submodules could not be checked out (pinned commit not on GitHub?):" >&2
+      printf '  %s\n' "${FAILED[@]}" >&2
+    fi
     cat <<EOF
 
 [setup] Workspace cloned in $TARGET (branch $SIM_BRANCH).
