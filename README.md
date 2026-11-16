@@ -12,7 +12,8 @@ Cámara estéreo **Stereolabs ZED 2i** para el Caddy AI2, siguiendo la estructur
 |---|---|
 | Simulación (Gazebo Harmonic `rgbd_camera` → imagen, profundidad, nube de puntos) | ✅ escrita, **sin probar todavía en Gazebo** |
 | Launch del hardware real (envuelve `zed-ros2-wrapper`) | ✅ escrito, **sin probar en la ZED Box** |
-| Dockerfile / contenedor para el Jetson Orin NX | ⏳ pendiente |
+| ZED SDK en la ZED Box | ✅ **5.5.1 instalado nativo** (Ubuntu 24.04, L4T R39, CUDA 13.2); cámara aún sin abrir |
+| Contenedor Docker | ❌ descartado: la ZED Box va con Ubuntu 24.04 y Jazzy nativos |
 | Malla oficial de la cámara | ⏳ pendiente (caja provisional) |
 
 > Para continuar el trabajo en otra sesión: [`docs/HANDOFF.md`](docs/HANDOFF.md). Instalación: `scripts/setup_workspace.sh`.
@@ -63,7 +64,12 @@ Las poses están **provisionales**: hay que medirlas en la barra superior del ve
 
 ## Hardware real
 
-Requiere `zed_wrapper` y el ZED SDK dentro del contenedor del Jetson, no en el workspace de simulación.
+Requiere el ZED SDK y `zed_wrapper`, instalados **de forma nativa en la ZED Box** (no hay contenedor), y no se compilan en el workspace de simulación.
+
+- **Wrapper fijado a `v5.5.0`** (`third_party/zed-ros2-wrapper`, commit `431dcf4`), que corresponde al ZED SDK **5.5.x**. El `master` del fork es `5.6.0-dev` y no se usa. No ejecutes `git submodule update --remote` sobre este submódulo: lo movería de vuelta al desarrollo.
+- Dependencias de ROS (apt, Jazzy): `ros-jazzy-zed-msgs`, `zed-description`, `robot-localization`, `nmea-msgs`, `geographic-msgs`, `diagnostic-updater`, `image-transport-plugins`, `backward-ros`, `xacro`, y `nlohmann-json3-dev`.
+- Las calibraciones de cada cámara se descargan la primera vez que se abre (necesita internet) en `/usr/local/zed/settings`.
+- Número de serie: `lsusb` y `/sys/bus/usb/devices/*/serial` muestran el de la interfaz HID (p. ej. `32698440`).
 
 ```bash
 ros2 launch caddy_ai2_ros2_camera_zed_2i zed_2i.launch.py camera_name:=zed_2i_left  serial_number:=<SN1>
