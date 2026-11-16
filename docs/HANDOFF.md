@@ -2,6 +2,14 @@
 
 Documento para continuar el trabajo en otra sesión de Claude Code. Estado a 2026-11-03.
 
+> **Actualización 2026-11-16 (sustituye a lo que contradiga de abajo).** La ZED Box ya se actualizó a
+> **Ubuntu 24.04 + ROS 2 Jazzy nativo** (L4T R39, CUDA 13.2), así que **no hay contenedor Docker** ni
+> JetPack 6.2: el punto 4 de «Pendiente» y la línea de contexto sobre JetPack 6.2 ya no aplican. El ZED SDK
+> **5.5.1** está instalado en `/usr/local/zed`. El wrapper se fija a `v5.5.0` (no `master`, que es `5.6.0-dev`).
+> Solo hay **una** ZED 2i disponible por ahora (la segunda la tiene un compañero), así que la comparación de
+> disposiciones A/B en hardware y el uso de dos `serial_number` están pendientes. La ZED Box hospeda además el
+> Helios, el VN-100 y un u-blox; ver el repo `caddy_ai2_ros2_robot_perception`.
+
 ## Objetivo
 
 Integrar dos ZED 2i, montadas en la barra superior del Caddy AI2, en la simulación (Gazebo Harmonic) y
