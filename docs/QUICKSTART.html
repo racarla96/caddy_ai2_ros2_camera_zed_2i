@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quickstart ZED 2i en la ZED Box</title>
+<style>
+  :root { --fg:#1d2330; --muted:#5b6475; --bg:#ffffff; --accent:#0b5cad; --code-bg:#f2f4f8; --line:#d9dde5; --warn-bg:#fff5e0; --warn-line:#e0a526; --ok-bg:#e8f5ec; --ok-line:#2e8b57; }
+  @media (prefers-color-scheme: dark) and (screen) {
+    :root { --fg:#e6e9ef; --muted:#9aa3b5; --bg:#14171d; --accent:#6db3ff; --code-bg:#1e232c; --line:#2d3441; --warn-bg:#2a2414; --warn-line:#a37b1f; --ok-bg:#15271c; --ok-line:#2e8b57; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 820px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 1.9rem; margin: 0 0 4px; }
+  .sub { color:var(--muted); margin:0 0 24px; }
+  h2 { font-size: 1.25rem; margin: 36px 0 8px; padding-top: 12px; border-top: 1px solid var(--line); }
+  h2 .n { color: var(--accent); margin-right: 8px; }
+  p, li { margin: 6px 0; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+  pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; margin: 10px 0; white-space: pre-wrap; word-break: break-word; }
+  pre code { background: none; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: .95rem; }
+  th, td { text-align: left; border: 1px solid var(--line); padding: 6px 10px; vertical-align: top; }
+  th { background: var(--code-bg); }
+  .note, .warn { border-left: 4px solid; border-radius: 4px; padding: 8px 12px; margin: 12px 0; }
+  .note { background: var(--ok-bg); border-color: var(--ok-line); }
+  .warn { background: var(--warn-bg); border-color: var(--warn-line); }
+  .meta { font-size: .85rem; color: var(--muted); margin-top: 40px; border-top: 1px solid var(--line); padding-top: 12px; }
+  @media print {
+    body { font-size: 11pt; }
+    main { max-width: none; padding: 0; }
+    h2 { break-after: avoid; }
+    pre, table, .note, .warn { break-inside: avoid; }
+  }
+  @page { size: A4; margin: 18mm 16mm; }
+</style>
+</head>
+<body>
+<main>
+
+<h1>Quickstart: ZED 2i en la ZED Box</h1>
+<p class="sub">Caddy AI2 · ROS 2 Jazzy nativo · actualizado el 23-nov-2026</p>
+
+<h2><span class="n">1</span>Qué hay instalado</h2>
+<table>
+  <tr><th>Elemento</th><th>Valor</th></tr>
+  <tr><td>Equipo</td><td>ZED Box Orin NX, <code>caddyai2jetson</code>, usuario <code>user</code></td></tr>
+  <tr><td>Sistema</td><td>Ubuntu 24.04.5, L4T R39 (JetPack 7.2.x), CUDA 13.2. Sin Docker</td></tr>
+  <tr><td>ZED SDK</td><td>5.5.1, en <code>/usr/local/zed</code></td></tr>
+  <tr><td>Wrapper ROS 2</td><td><code>zed-ros2-wrapper</code> fijado a <code>v5.5.0</code>, compilado en <code>~/ws_zed</code></td></tr>
+  <tr><td>Cámara</td><td>ZED 2i, nº de serie 32698440 (hay una sola; la segunda la tiene un compañero)</td></tr>
+</table>
+
+<h2><span class="n">2</span>Antes de encender</h2>
+<ol>
+  <li>Conecta la ZED 2i a un puerto <strong>USB 3</strong> de la ZED Box.</li>
+  <li>Enciende la ZED Box y espera a que responda.</li>
+</ol>
+<div class="warn"><strong>El cable USB-C tiene orientación.</strong> Si la cámara enumera a 480 Mb/s (USB 2) en lugar de 5000 Mb/s, el nodo falla con <code>CAMERA NOT DETECTED</code>. Se arregla dando la vuelta al conector USB-C del lado de la cámara.</div>
+
+<h2><span class="n">3</span>Entrar en la ZED Box</h2>
+<table>
+  <tr><th>Vía</th><th>Dirección</th></tr>
+  <tr><td>USB (cable al PC)</td><td><code>ssh user@192.168.55.1</code></td></tr>
+  <tr><td>WiFi UPVNET</td><td>la IP que tenga asignada (la última vista: <code>158.42.154.125</code>)</td></tr>
+</table>
+<p>Si usas <code>sudo</code> por ssh, añade <code>-t</code> (<code>ssh -t user@... 'sudo ...'</code>), porque pide contraseña.</p>
+
+<h2><span class="n">4</span>Comprobar que la cámara está en USB 3</h2>
+<pre><code>lsusb -t | grep -B1 -A1 uvcvideo</code></pre>
+<p>Debe aparecer <code>5000M</code>. Si aparece <code>480M</code>, vuelve al aviso del apartado 2.</p>
+
+<h2><span class="n">5</span>Arrancar la cámara</h2>
+<pre><code>source /opt/ros/jazzy/setup.bash
+source ~/ws_zed/install/setup.bash
+ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i publish_urdf:=true</code></pre>
+<p>Para que siga corriendo al cerrar la sesión ssh, lánzalo desacoplado:</p>
+<pre><code>setsid nohup ros2 launch zed_wrapper zed_camera.launch.py \
+  camera_model:=zed2i publish_urdf:=true \
+  &gt; ~/zed_launch.log 2&gt;&amp;1 &lt; /dev/null &amp;</code></pre>
+<div class="note"><strong>Primera vez con una cámara nueva:</strong> descarga su calibración y optimiza el modelo de profundidad <code>NEURAL_LIGHT</code>, unos 6 minutos. Solo ocurre una vez; con la cámara 32698440 ya está hecho y arranca en segundos.</div>
+<div class="warn"><strong>No uses</strong> <code>ros2 launch caddy_ai2_ros2_camera_zed_2i zed_2i.launch.py</code>. Ese launch del repositorio lleva <code>publish_urdf:=false</code> y el nodo se queda parado en <em>Waiting for valid static transformations</em>. Está pendiente de decidir cómo se publica el árbol de frames (ver apartado 9).</div>
+
+<h2><span class="n">6</span>Qué publica</h2>
+<p>Todo bajo <code>/zed/zed_node/</code>. Medido con la cámara en HD720 a 60 fps:</p>
+<table>
+  <tr><th>Qué</th><th>Topic</th><th>Tasa</th><th>Frame</th></tr>
+  <tr><td>Imagen izquierda</td><td><code>rgb/color/rect/image</code></td><td>58 Hz</td><td><code>zed_left_camera_frame_optical</code></td></tr>
+  <tr><td>Profundidad</td><td><code>depth/depth_registered</code></td><td>56 Hz</td><td><code>zed_left_camera_frame_optical</code></td></tr>
+  <tr><td>IMU</td><td><code>imu/data</code></td><td>100 Hz</td><td></td></tr>
+  <tr><td>Nube de puntos</td><td><code>point_cloud/cloud_registered</code></td><td>10 Hz (114 688 puntos)</td><td><code>zed_left_camera_frame</code></td></tr>
+  <tr><td>Pose</td><td><code>pose</code></td><td></td><td></td></tr>
+</table>
+<p>Comprobación rápida:</p>
+<pre><code>ros2 topic list | grep zed
+ros2 topic hz /zed/zed_node/imu/data</code></pre>
+<p>Carga aproximada: el wrapper consume ~175 % de un núcleo y la GPU ~22 %. La nube se limita a 10 Hz con <code>point_cloud_freq: 10</code>.</p>
+
+<h2><span class="n">7</span>Verlo en RViz (escritorio de la ZED Box)</h2>
+<p>El fichero <code>docs/zed_view.rviz</code> de este repositorio ya trae la imagen, la profundidad y la nube, con Fixed Frame <code>zed_left_camera_frame</code>. Cópialo a la ZED Box una vez:</p>
+<pre><code>scp docs/zed_view.rviz user@192.168.55.1:~/zed_view.rviz</code></pre>
+<p>Y, en una terminal del escritorio de la ZED Box con la cámara en marcha:</p>
+<pre><code>source /opt/ros/jazzy/setup.bash
+rviz2 -d ~/zed_view.rviz</code></pre>
+
+<h2><span class="n">8</span>Parar la cámara</h2>
+<ul>
+  <li>En primer plano: <code>Ctrl-C</code>.</li>
+  <li>Desacoplada: busca el PID (<code>ps aux | grep zed_wrapper</code>) y envía <code>kill</code>; si no responde, <code>kill -9 &lt;PID&gt;</code>.</li>
+</ul>
+<div class="warn">Evita <code>pkill -f &lt;patrón&gt;</code> por ssh: el patrón puede coincidir con el propio comando ssh y matar tu sesión. Usa el PID.</div>
+
+<h2><span class="n">9</span>Problemas frecuentes y pendientes</h2>
+<table>
+  <tr><th>Síntoma</th><th>Causa y solución</th></tr>
+  <tr><td><code>CAMERA NOT DETECTED</code></td><td>La cámara está en USB 2 (480M). Da la vuelta al conector USB-C.</td></tr>
+  <tr><td>Se queda en <em>Waiting for valid static transformations</em></td><td>Se lanzó con <code>publish_urdf:=false</code>. Usa <code>publish_urdf:=true</code>.</td></tr>
+  <tr><td>Tarda minutos en abrir</td><td>Primera apertura de una cámara nueva: optimiza el modelo de profundidad (~6 min, una sola vez).</td></tr>
+  <tr><td>Sin respuesta en <code>192.168.55.1</code></td><td>El cable USB al PC no está conectado o la ZED Box está apagada.</td></tr>
+</table>
+<p><strong>Pendiente de decidir (apuntado en el plan):</strong></p>
+<ul>
+  <li>Si el wrapper publica su propio árbol de frames (<code>publish_urdf:=true</code>) o se alimenta de nuestro URDF, y arreglar <code>zed_2i.launch.py</code> en consecuencia.</li>
+  <li>Alinear los nombres de topics y frames del README, del bridge y del launch con los reales del wrapper (<code>rgb/color/rect/image</code>, <code>zed_left_camera_frame_optical</code>).</li>
+  <li>Segunda cámara: <code>serial_number</code> distinto en cada una, medir su pose en la barra del vehículo y comparar las disposiciones A y B.</li>
+</ul>
+
+<p class="meta">Caddy AI2 · CERVAREC · <a href="https://github.com/racarla96/caddy_ai2_ros2_camera_zed_2i">caddy_ai2_ros2_camera_zed_2i</a> · Licencia CC BY 4.0. Las tasas se midieron el 16-nov-2026 con una ZED 2i; el resto de comandos se probaron en esa misma sesión.</p>
+
+</main>
+</body>
+</html>
