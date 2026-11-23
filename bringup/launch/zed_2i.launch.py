@@ -31,8 +31,11 @@ def generate_launch_description():
             'camera_name': LaunchConfiguration('camera_name'),
             'camera_model': 'zed2i',
             'serial_number': LaunchConfiguration('serial_number'),
-            # The robot URDF and TF tree come from caddy_ai2_ros2_description.
-            'publish_urdf': 'false',
+            # publish_urdf must stay true: with false the wrapper node blocks at
+            # "Waiting for valid static transformations" (verified on the ZED Box, wrapper v5.5.0).
+            # So the camera's own frame tree is published by the wrapper; reconciling it with the
+            # robot URDF is still pending (see docs/PLAN_REORGANIZACION.md, Fase E).
+            'publish_urdf': 'true',
             'publish_tf': 'false',
             'publish_map_tf': 'false',
         }.items(),

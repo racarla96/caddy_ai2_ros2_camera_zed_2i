@@ -74,7 +74,7 @@ Verificado además contra el código vendorizado (`third_party/zed-ros2-wrapper`
 ## Riesgo conocido: frames reales frente a simulados
 
 El wrapper real etiqueta sus imágenes con sus propios frames ópticos (nombres derivados de `camera_name`),
-y `zed_2i.launch.py` lo lanza con `publish_urdf:=false`. Si no coinciden con `<frame_id>_optical` del URDF del robot,
+y `zed_2i.launch.py` lo lanzaba con `publish_urdf:=false` (cambiado a `true` el 23-nov-2026: con `false` el nodo se bloquea). Si no coinciden con `<frame_id>_optical` del URDF del robot,
 la nube de puntos real no se podrá transformar a `base_link`. Hay que reconciliarlo al probar en hardware
 (o renombrar el frame en el URDF, o dejar que el wrapper publique su URDF colgado del de la barra).
 

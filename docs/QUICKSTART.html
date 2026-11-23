@@ -74,14 +74,16 @@
 
 <h2><span class="n">5</span>Arrancar la cámara</h2>
 <pre><code>source /opt/ros/jazzy/setup.bash
-source ~/ws_zed/install/setup.bash
-ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i publish_urdf:=true</code></pre>
+source ~/ws_zed/install/setup.bash          # wrapper de la ZED
+source ~/ws_perception/install/setup.bash   # paquete caddy_ai2_ros2_camera_zed_2i
+ros2 launch caddy_ai2_ros2_camera_zed_2i zed_2i.launch.py camera_name:=zed</code></pre>
+<p>Argumentos: <code>camera_name</code> (por defecto <code>zed_2i_front</code>; también es el espacio de nombres de los topics) y <code>serial_number</code> (por defecto <code>0</code>, la primera cámara que encuentre; obligatorio con dos cámaras). Los topics de esta guía suponen <code>camera_name:=zed</code>.</p>
 <p>Para que siga corriendo al cerrar la sesión ssh, lánzalo desacoplado:</p>
-<pre><code>setsid nohup ros2 launch zed_wrapper zed_camera.launch.py \
-  camera_model:=zed2i publish_urdf:=true \
-  &gt; ~/zed_launch.log 2&gt;&amp;1 &lt; /dev/null &amp;</code></pre>
+<pre><code>setsid nohup ros2 launch caddy_ai2_ros2_camera_zed_2i zed_2i.launch.py \
+  camera_name:=zed &gt; ~/zed_launch.log 2&gt;&amp;1 &lt; /dev/null &amp;</code></pre>
 <div class="note"><strong>Primera vez con una cámara nueva:</strong> descarga su calibración y optimiza el modelo de profundidad <code>NEURAL_LIGHT</code>, unos 6 minutos. Solo ocurre una vez; con la cámara 32698440 ya está hecho y arranca en segundos.</div>
-<div class="warn"><strong>No uses</strong> <code>ros2 launch caddy_ai2_ros2_camera_zed_2i zed_2i.launch.py</code>. Ese launch del repositorio lleva <code>publish_urdf:=false</code> y el nodo se queda parado en <em>Waiting for valid static transformations</em>. Está pendiente de decidir cómo se publica el árbol de frames (ver apartado 9).</div>
+<div class="note">El launch del repositorio usa <code>publish_urdf:=true</code>: el wrapper publica su propio árbol de frames. Con <code>false</code> el nodo se queda parado en <em>Waiting for valid static transformations</em>. Cómo encajar ese árbol con el URDF del robot sigue pendiente (apartado 9).</div>
+<p>Si el paquete no está en <code>~/ws_perception</code>, el launch del wrapper se puede usar directamente: <code>ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2i publish_urdf:=true</code>.</p>
 
 <h2><span class="n">6</span>Qué publica</h2>
 <p>Todo bajo <code>/zed/zed_node/</code>. Medido con la cámara en HD720 a 60 fps:</p>
@@ -116,18 +118,18 @@ rviz2 -d ~/zed_view.rviz</code></pre>
 <table>
   <tr><th>Síntoma</th><th>Causa y solución</th></tr>
   <tr><td><code>CAMERA NOT DETECTED</code></td><td>La cámara está en USB 2 (480M). Da la vuelta al conector USB-C.</td></tr>
-  <tr><td>Se queda en <em>Waiting for valid static transformations</em></td><td>Se lanzó con <code>publish_urdf:=false</code>. Usa <code>publish_urdf:=true</code>.</td></tr>
+  <tr><td>Se queda en <em>Waiting for valid static transformations</em></td><td>Se lanzó con <code>publish_urdf:=false</code> (el launch del repositorio ya no lo hace). Usa <code>publish_urdf:=true</code>.</td></tr>
   <tr><td>Tarda minutos en abrir</td><td>Primera apertura de una cámara nueva: optimiza el modelo de profundidad (~6 min, una sola vez).</td></tr>
   <tr><td>Sin respuesta en <code>192.168.55.1</code></td><td>El cable USB al PC no está conectado o la ZED Box está apagada.</td></tr>
 </table>
 <p><strong>Pendiente de decidir (apuntado en el plan):</strong></p>
 <ul>
-  <li>Si el wrapper publica su propio árbol de frames (<code>publish_urdf:=true</code>) o se alimenta de nuestro URDF, y arreglar <code>zed_2i.launch.py</code> en consecuencia.</li>
+  <li>Hoy el wrapper publica su propio árbol de frames (<code>publish_urdf:=true</code>). Falta decidir si se queda así o si se alimenta de nuestro URDF.</li>
   <li>Alinear los nombres de topics y frames del README, del bridge y del launch con los reales del wrapper (<code>rgb/color/rect/image</code>, <code>zed_left_camera_frame_optical</code>).</li>
   <li>Segunda cámara: <code>serial_number</code> distinto en cada una, medir su pose en la barra del vehículo y comparar las disposiciones A y B.</li>
 </ul>
 
-<p class="meta">Caddy AI2 · CERVAREC · <a href="https://github.com/racarla96/caddy_ai2_ros2_camera_zed_2i">caddy_ai2_ros2_camera_zed_2i</a> · Licencia CC BY 4.0. Las tasas se midieron el 16-nov-2026 con una ZED 2i; el resto de comandos se probaron en esa misma sesión.</p>
+<p class="meta">Caddy AI2 · CERVAREC · <a href="https://github.com/racarla96/caddy_ai2_ros2_camera_zed_2i">caddy_ai2_ros2_camera_zed_2i</a> · Licencia CC BY 4.0. Las tasas se midieron el 16-nov-2026 con una ZED 2i; el launch del repositorio se probó el 23-nov-2026 (IMU 100 Hz, imagen 57 Hz, nube ~10 Hz).</p>
 
 </main>
 </body>

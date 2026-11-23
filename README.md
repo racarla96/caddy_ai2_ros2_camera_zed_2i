@@ -7,6 +7,7 @@ Cámara estéreo **Stereolabs ZED 2i** para el Caddy AI2, siguiendo la estructur
 **Licencia:** [CC BY 4.0](LICENSE.MD)
 
 **Arrancar la cámara en la ZED Box:** [Quickstart (HTML)](docs/QUICKSTART.html) · [Quickstart (PDF)](docs/QUICKSTART.pdf). Incluye `docs/zed_view.rviz` para verla en RViz.
+`zed_2i.launch.py` ya usa `publish_urdf:=true` (con `false` el nodo se bloqueaba esperando transformaciones); probado el 23-nov-2026 en la ZED Box.
 
 ## Estado
 
